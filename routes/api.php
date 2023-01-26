@@ -13,7 +13,8 @@ Route::get('/items', [ItemController::class, 'index']);
 
 Route::prefix('/item')->group(function () {
     Route::post('/store', [ItemController::class, 'store']);
-    Route::put('/{id}', [ItemController::class, 'update']);
+    Route::patch('/{id}', [ItemController::class, 'update']);
+    Route::put('/{id}', [ItemController::class, 'edit']);
     Route::delete('/{id}', [ItemController::class, 'destroy']);
 });
 
