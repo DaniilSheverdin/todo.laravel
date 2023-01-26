@@ -19,8 +19,8 @@ class Item extends JsonResource
             'title' => $this->title,
             'description' => $this->description,
             'updated_at' => $this->updated_at,
+            'completed_at' => $this->completed_at,
             'created_at' => $this->created_at,
-            'status' => $this->status,
             'user_id' => $this->user_id,
             'completed' => $this->completed
         ];

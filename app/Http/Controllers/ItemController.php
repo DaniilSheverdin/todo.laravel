@@ -2,122 +2,138 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
+use App\Repositories\Items;
 use Illuminate\Http\Request;
 use App\Models\Item;
 
 class ItemController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    protected $itemsRepository;
+
+    public function __construct()
     {
-        return Item::orderBy('created_at', 'DESC')->get();
+        $this->itemsRepository = new Items();
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
-    public function create()
+    public function index(): JsonResponse
     {
-        //
+        $tasksFetch =
+            $this
+                ->itemsRepository
+                ->all();
+
+        if ($tasksFetch->hasError()) {
+            return response()->json($tasksFetch->getMessage(), 500);
+        }
+
+        return response()->json($tasksFetch->getItems());
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return Item
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function store(Request $request): Item
+    public function store(Request $request): JsonResponse
     {
-        $obNewItem = new Item();
+        $itemsStore =
+            $this
+                ->itemsRepository
+                ->store($request);
 
-        $obNewItem->title = $request->item['title'];
-        $obNewItem->user_id = $request->item['user_id'];
-        $obNewItem->description = $request->item['description'] ?? '';
-        $obNewItem->save();
+        if ($itemsStore->hasError()) {
+            return response()->json($itemsStore->getMessage(), 500);
+        }
 
-        return $obNewItem;
+        return response()->json($itemsStore->getItems(), 201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param int $id
+     * @return JsonResponse
      */
-    public function show($id)
+    public function show(int $id): JsonResponse
     {
-        //
+        $tasksFetch =
+            $this
+                ->itemsRepository
+                ->show($id);
+
+        if ($tasksFetch->hasError()) {
+            return response()->json($tasksFetch->getMessage(), 500);
+        }
+
+        return response()->json($tasksFetch->getItems());
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param int $id
+     * @return JsonResponse
      */
-    public function edit(Request $request, $id)
+    public function edit(Request $request, int $id): JsonResponse
     {
-        $obItem = Item::find($id);
+        $itemsFetch =
+            $this
+                ->itemsRepository
+                ->edit($request, $id);
 
-        if($obItem){
-            if (isset($request->item['description']))
-                $obItem->description = $request->item['description'];
-            if (isset($request->item['title']))
-                $obItem->title = $request->item['title'];
-            $obItem->updated_at = Carbon::now();
-
-            $obItem->save();
-            return $obItem;
+        if ($itemsFetch->hasError()) {
+            return response()->json($itemsFetch->getMessage(), 500);
         }
 
-        return "not found";
+        return response()->json($itemsFetch->getItems());
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param Request $request
+     * @param int $id
      * @return
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id): JsonResponse
     {
-        $obItem = Item::find($id);
+        $itemsFetch =
+            $this
+                ->itemsRepository
+                ->update($request, $id);
 
-        if($obItem){
-            $obItem->completed = (bool)$request->item['completed'];
-            $obItem->updated_at = Carbon::now();
-            $obItem->completed_at = $request->item['completed'] ? Carbon::now() : null;
-
-            $obItem->save();
-            return $obItem;
+        if ($itemsFetch->hasError()) {
+            return response()->json($itemsFetch->getMessage(), 500);
         }
 
-        return "not found";
+        return response()->json($itemsFetch->getItems());
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param int $id
+     * @return JsonResponse
      */
-    public function destroy($id)
+    public function destroy(int $id): JsonResponse
     {
-        $obItem = Item::find($id);
+        $itemsFetch =
+            $this
+                ->itemsRepository
+                ->delete($id);
 
-        if($obItem){
-            $obItem->delete();
-            return "Successfully deleted.";
+        if ($itemsFetch->hasError()) {
+            return response()->json($itemsFetch->getMessage(), 500);
         }
-        return "not found";
+
+        return response()->json($itemsFetch->getMessage());
     }
 }
